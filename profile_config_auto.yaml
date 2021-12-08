@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2021 NVIDIA CORPORATION
+# SPDX-License-Identifier: MIT
+
 model_repository: model_repository
 # One must specify the full path to the output_model_repository here:
 output_model_repository_path: /raid/users/dmitrym/triton_model_analyzer/output_model_repository
