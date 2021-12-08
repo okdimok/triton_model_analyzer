@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 NVIDIA CORPORATION
+# SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: MIT
 model_repository: model_repository
 # One must specify the full path to the output_model_repository here:

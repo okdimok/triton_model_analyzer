@@ -6,5 +6,5 @@ Dmitry Mironov [dmitrym@nvidia.com](mailto:dmitrym@nvidia.com)
 
 Please, see the LICENSE file.
 
-SPDX-FileCopyrightText: 2021 NVIDIA CORPORATION
+SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 SPDX-License-Identifier: MIT
