@@ -1,0 +1,39 @@
+# https://github.com/triton-inference-server/model_navigator/blob/main/docs/triton_model_configurator.md
+# https://github.com/triton-inference-server/model_navigator/blob/main/docs/conversion.md
+
+model_name: hifigan
+model_path: hifigan.pt
+model_repository: navigator_model_repository
+inputs:
+  INPUT__0:
+    name: INPUT__0 # spec
+    shape: [-1, 80, -1]
+    dtype: float32
+outputs:
+  OUTPUT__0:
+    name: OUTPUT__0 # audio
+    shape: [-1, 1, -1]
+    dtype: float32
+
+min_shapes:
+  INPUT__0: [1, 80, 40]
+
+opt_shapes:
+  INPUT__0: [8, 80, 140]
+
+max_shapes:
+  INPUT__0: [128, 80, 300]
+
+# https://github.com/triton-inference-server/model_navigator/blob/main/docs/conversion.md#verification-of-conversion-correctness
+rtol: # relative tolerance
+  OUTPUT__0: 1.0e-3
+
+atol: # absolute tolerance
+  OUTPUT__0: 4.0e-2
+
+value_ranges:
+  INPUT__0: [0., 1.]
+
+# in bytes
+max_workspace_size: 14000000000
+
