@@ -8,5 +8,6 @@ plots
 reports
 results
 hifigan.pt
+hifigan.onnx
 backtrace.log
 model_navigator_help.txt
