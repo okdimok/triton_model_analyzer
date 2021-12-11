@@ -4,7 +4,8 @@
 
 model_repository: model_repository
 # One must make sure the full path to the output_model_repository allows to mount it to a child container (i.e. it is the same inside the container and outside it):
-output_model_repository_path: output_model_repository
+# prior to 22.01 one must specify the full path
+output_model_repository_path: /raid/users/dmitrym/triton_model_analyzer_clone/output_model_repository
 triton_launch_mode: docker
 # override_output_model_repository: True
 run_config_search_disable: True
@@ -25,7 +26,8 @@ profile_models:
       concurrency: [1, 3]
       batch_sizes: [1, 4, 8]
     perf_analyzer_flags:
-      shape: "spec:80,140"
+      shape: 
+      - "spec:80,140"
     model_config_parameters:
       version_policy: 
         specific:
