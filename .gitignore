@@ -3,6 +3,7 @@ model_navigator
 model_repository
 navigator_workspace
 navigator_model_repository
+output_model_repository
 output_model_repository_
 plots
 reports
@@ -11,3 +12,4 @@ hifigan.pt
 hifigan.onnx
 backtrace.log
 model_navigator_help.txt
+perf_analyzer_help.txt

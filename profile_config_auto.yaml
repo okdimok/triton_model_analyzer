@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: MIT
 
 model_repository: model_repository
-# One must specify the full path to the output_model_repository here:
-output_model_repository_path: /raid/users/dmitrym/triton_model_analyzer/output_model_repository
+# One must make sure the full path to the output_model_repository allows to mount it to a child container (i.e. it is the same inside the container and outside it):
+output_model_repository_path: output_model_repository
 triton_launch_mode: docker
 override_output_model_repository: True
 # These are different between manual and auto
