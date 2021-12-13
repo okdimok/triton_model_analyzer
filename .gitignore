@@ -13,3 +13,4 @@ hifigan.onnx
 backtrace.log
 model_navigator_help.txt
 perf_analyzer_help.txt
+navigator_config_run.yaml

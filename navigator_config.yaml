@@ -6,6 +6,10 @@
 model_name: hifigan
 model_path: hifigan.pt
 model_repository: navigator_model_repository
+
+dtypes:
+  INPUT__0: float32
+  
 inputs:
   INPUT__0:
     name: INPUT__0 # spec
