@@ -3,6 +3,7 @@
 
 platform: "onnxruntime_onnx"
 max_batch_size: 128
+dynamic_batching { }
 
 input [
     {
