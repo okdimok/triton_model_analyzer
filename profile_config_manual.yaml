@@ -28,7 +28,7 @@ profile_models:
     # they do note create new model configs
     parameters:
       concurrency: [1, 16]
-      batch_sizes: [1, 8] # note this uses a pre-packed batch, so it makes sense only for offline
+      batch_sizes: [1] # note this uses a pre-packed batch, so it makes sense only for offline
     perf_analyzer_flags:
       shape: 
       - "spec:80,140"
@@ -40,9 +40,8 @@ profile_models:
           versions: [[1]]
       instance_group:
       - kind: KIND_GPU
-        count: 1
-      # let's check the effect of the dynamic batching
-      dynamic_batching: [{}, None]
+        # Let's check two versions of the model
+        count: [1, 2]
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#constraint
 constraints:
