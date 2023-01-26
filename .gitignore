@@ -1,10 +1,12 @@
 analyzer_export
+analyzer_export_quick
 checkpoints
 model_navigator
 model_repository
 navigator_workspace
 navigator_model_repository
 output_model_repository
+output_model_repository_quick
 output_model_repository_
 plots
 reports

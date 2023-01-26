@@ -4,12 +4,15 @@
 
 model_repository: model_repository
 # One must make sure the full path to the output_model_repository allows to mount it to a child container (i.e. it is the same inside the container and outside it):
-output_model_repository_path: output_model_repository
-export_path: analyzer_export
-checkpoint_directory: analyzer_export/checkpoints
+# prior to 22.01 one must specify the full path
+output_model_repository_path: output_model_repository_quick
+export_path: analyzer_export_quick
+checkpoint_directory: analyzer_export_quick/checkpoints
 triton_launch_mode: docker
 # override_output_model_repository: True
-run_config_search_disable: True
+#### Changed for quick
+run_config_search_disable: False
+run_config_search_mode: quick
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/metrics.md
 inference_output_fields: [
@@ -23,24 +26,14 @@ inference_output_fields: [
 #https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#configuring-model-analyzer
 profile_models:
   hifigan:
-    # these are the sets of the parameters of the measurements
-    # they do note create new model configs
-    parameters:
-      concurrency: [1, 16]
-      batch_sizes: [1] # note this uses a pre-packed batch, so it makes sense only for offline
+    #### Changed for quick
+    # we no longer define the concurrencies
     perf_analyzer_flags:
       shape: 
       - "spec:80,140"
       measurement-request-count: 128
-    # these define the potential model configs
-    model_config_parameters:
-      version_policy: 
-        specific:
-          versions: [[1]]
-      instance_group:
-      - kind: KIND_GPU
-        # Let's check two versions of the model
-        count: [1, 2]
+    #### Changed for quick
+    # we no longer define the potential model configs
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#constraint
 constraints:
