@@ -27,12 +27,12 @@ profile_models:
     # these are the sets of the parameters of the measurements
     # they do note create new model configs
     parameters:
-      concurrency: [1, 8, 16]
+      concurrency: [1, 16]
       batch_sizes: [1, 8] # note this uses a pre-packed batch, so it makes sense only for offline
     perf_analyzer_flags:
       shape: 
       - "spec:80,140"
-      measurement-request-count: 512
+      measurement-request-count: 128
     # these define the potential model configs
     model_config_parameters:
       version_policy: 
@@ -42,7 +42,7 @@ profile_models:
       -
         kind: KIND_GPU
         # this will define three configs of the model
-        count: [1, 2, 4]
+        count: [1, 2]
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#constraint
 constraints:
@@ -57,11 +57,10 @@ objectives:
 
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#config-options-for-report
-# since there are 3 configs of the model created, we need to include them in the final report
+# since there are 2 configs of the model created, we need to include them in the final report
 report_model_configs: 
   - hifigan_config_0
   - hifigan_config_1
-  - hifigan_config_2
   - hifigan_config_default
 
 num_configs_per_model: 4 # the default is 3, but we have not much more
