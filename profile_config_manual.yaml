@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright (c) 2021 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-FileCopyrightText: Copyright (c) 2023 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: MIT
 
 
@@ -39,10 +39,10 @@ profile_models:
         specific:
           versions: [[1]]
       instance_group:
-      -
-        kind: KIND_GPU
-        # this will define three configs of the model
-        count: [1, 2]
+      - kind: KIND_GPU
+        count: 1
+      # let's check the effect of the dynamic batching
+      dynamic_batching: [{}, None]
 
 # https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config.md#constraint
 constraints:
