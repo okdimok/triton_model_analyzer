@@ -17,3 +17,9 @@ backtrace.log
 model_navigator_help.txt
 perf_analyzer_help.txt
 navigator_config_run.yaml
+*.engine
+*.trt
+*.onnx
+*.plan
+__pycache__
+TensorRT
