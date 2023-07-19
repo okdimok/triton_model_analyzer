@@ -70,6 +70,7 @@ def main():
     mnist_model = model.MnistModel()
     mnist_model.learn()
     export_model(mnist_model.network)
+    torch.save(mnist_model, "model.pt")
 
 if __name__ == "__main__":
     main()

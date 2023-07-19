@@ -21,6 +21,9 @@ navigator_config_run.yaml
 *.trt
 *.onnx
 *.plan
+*.pt
 __pycache__
 TensorRT
 *.pyc
+trtexec_help.txt
+trt.log
