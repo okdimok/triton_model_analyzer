@@ -65,12 +65,14 @@ def export_model(model):
         dynamic_axes=dynamic_axes
     )
 
+    model_scripted = torch.jit.script(model) # Export to TorchScript
+    model_scripted.save('model.pt') # Save
+
 def main():
     # Train the PyTorch model
     mnist_model = model.MnistModel()
     mnist_model.learn()
     export_model(mnist_model.network)
-    torch.save(mnist_model, "model.pt")
 
 if __name__ == "__main__":
     main()

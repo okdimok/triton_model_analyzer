@@ -1,39 +1,30 @@
 ```
-                                     ┌──────────────────────────────┐
-                                     │                              │
-                                     │                              │
-                                     │        Triton server         │
-                                     │                              │
-                                     │                              │
-                                     │      ┌────────────────┐      │
-                                     │      │                │      │
-                                ┌────┼──────►   ONNX model   │      │
-                                │    │      │                │      │
-                                │    │      └────────────────┘      │
-                                │    │                              │
-                                │    │                              │
-┌───────────────────────┐       │    │                              │
-│                       │       │    │                              │
-│                       │       │    │      ┌──────────────────┐    │
-│                       │       │    │      │                  │    │
-│       Client app      ├───────┼────┼──────►  TensorRT model  │    │
-│                       │       │    │      │                  │    │
-│                       │       │    │      └──────────────────┘    │
-│                       │       │    │                              │
-└───────────────────────┘       │    │                              │
-                                │    │                              │
-                                │    │      ┌──────────────────┐    │
-                                │    │      │                  │    │
-                                └────┼──────►   BLS model      │    │
-                                     │      │                  │    │
-                                     │      └──────────────────┘    │
-                                     │                              │
-                                     └──────────────────────────────┘
+                                     ┌───────────────────────────────┐
+                                     │                               │
+                                     │        Triton server          │
+                                     │                               │
+                                     │      ┌──────────────────┐     │
+                                ┌────┼──────►    ONNX model    │     │
+                                │    │      └──────────────────┘     │
+┌───────────────────────┐       │    │                               │
+│                       │       │    │      ┌──────────────────┐     │
+│       Client app      ├───────┼────┼──────►  TensorRT model  │     │
+│                       │       │    │      └──────────────────┘     │
+└───────────────────────┘       │    │                               │
+                                │    │      ┌──────────────────┐     │
+                                ├────┼──────► TorchScript model│     │
+                                │    │      └──────────────────┘     │
+                                │    │                               │
+                                │    │      ┌──────────────────┐     │
+                                └────┼──────►     BLS model    │     │
+                                     │      └──────────────────┘     │
+                                     │                               │
+                                     └───────────────────────────────┘
 ```
 
 ## Topics
 * Containers(TensorRT, Triton, SDK and Client) overview
-* Create a MNIST PyTorch model and export it to ONNX
+* Create a MNIST PyTorch model and export it to ONNX and PyTorch TorchScript formats
 * Optimize it using TensorRT
 * Setup Triton to serve TensorRT optimized model, ONNX model and the BLS example model
 * Create demo client app and test it
@@ -107,6 +98,7 @@ Now we can exit the container with `Ctrl+D`
 ```
 cp onnx_export/model.trt inference/model_repo/mnist_trt/1/model.plan
 cp onnx_export/model.onnx inference/model_repo/mnist_onnx/1/model.onnx
+cp onnx_export/model.pt inference/model_repo/mnist_pt/1/model.pt
 ```
 
 6. Start Triton Inference Server
@@ -124,7 +116,9 @@ tritonserver --model-repository /workspace/ext/inference/model_repo \
 cd triton_model_analyzer/triton_webinar
 docker run --gpus all --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
 --name triton_clients \
--v "$(pwd)":/workspace/ext --net host nvcr.io/nvidia/tritonserver:23.05-py3-sdk
+-v "$(pwd)":/workspace/ext \
+-v "$(pwd)":"$(pwd)" --env EXTWD="$(pwd)" \
+--net host nvcr.io/nvidia/tritonserver:23.05-py3-sdk
 cd /workspace/ext
 ```
 
@@ -134,14 +128,22 @@ curl -X POST http://127.0.0.1:8000/v2/repository/index
 curl http://127.0.0.1:8000/v2/models/mnist_trt/config | jq
 ```
 
+9. Now let's run our very simple client
+```
+cd /workspace/ext/client
+python client.py
+cd /workspace/ext
+```
+
+It should predict 7, the correct answer.
 
 
-8. One can save perf_analyzer help for later usage:
+10. Now let's measure the approximate performance of the model with perf_analyzer. One can save perf_analyzer help for later usage:
 ```
 perf_analyzer --help 2>&1 | tee perf_analyzer_help.txt
 ```
 
-9. Then measure the performance of the trt model
+11. Then measure the performance of the trt model
 
 ```
 perf_analyzer -m mnist_trt --shape "input:1,28,28"
@@ -174,7 +176,53 @@ Concurrency: 257, throughput: 35058.6 infer/sec, latency 7328 usec
 We see dynamic batching adds 20x to the model performance. 
 See [Recommended Configuration Process](https://github.com/triton-inference-server/server/blob/main/docs/user_guide/model_configuration.md#recommended-configuration-process) on how to optimize the performace of the model further.
 
+12. Let's compare the trt, the onnx and the pt model on concurrency 65.
 
-model-analyzer profile --model-repository /home/semadu/workspace/inference_demo/inference/model_repo --profile-models mnist_trt --triton-launch-mode=docker --output-model-repository-path /home/semadu/workspace/inference_demo/inference/output --run-config-search-max-concurrency 2 --run-config-search-max-model-batch-size 2 --run-config-search-max-instance-count 2 --override-output-model-repository
+```
+perf_analyzer -m mnist_onnx --shape "input:1,28,28" \
+-b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
+-i gRPC \
+--concurrency-range 65
+```
 
-perf_analyzer -m mnist_trt
+```
+Inferences/Second vs. Client Average Batch Latency
+Concurrency: 65, throughput: 26951.8 infer/sec, latency 2410 usec
+```
+
+```
+perf_analyzer -m mnist_pt --shape "input:1,28,28" \
+-b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
+-i gRPC \
+--concurrency-range 65
+```
+```
+Inferences/Second vs. Client Average Batch Latency
+Concurrency: 65, throughput: 4799.15 infer/sec, latency 13543 usec
+```
+
+Finally, these are the results of the comparison for me. We see TensorRT gives the highest throughput having the lowest latency.
+
+| Framework           | Throughput (infer/sec) | Throuput Relative | Latency    | Latency Relative |
+|---------------------|------------|-------------------|------------|------------------|
+| PyTorch TorchScript | 4799.15    | 1X                | 13543 usec |  6.3X            |
+| ONNX Runtime        | 26951.8    | 5.6X              | 2410 usec  |  1.12X           |
+| TensorRT            | 30403.9    | 6.3X              | 2136 usec  |  1X              |
+
+13. Finally, this is a sample model analyzer command, to seek through the trt model configurations. For that, stop the Triton Server Container and then in the client container run. See the [docs](https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config_search.md) for further details.
+
+```
+cd "${EXTWD}"
+model-analyzer profile --help  | tee model_analyzer_profile_help.txt
+model-analyzer profile --model-repository "${EXTWD}/inference/model_repo" \
+--profile-models mnist_trt --triton-launch-mode=docker \
+--output-model-repository-path "${EXTWD}/inference/output" \
+--run-config-search-max-concurrency 256 \
+--run-config-search-min-concurrency 16 \
+--run-config-search-max-instance-count 4 \
+--run-config-search-max-model-batch-size 128 \
+--run-config-search-mode quick \
+--override-output-model-repository
+```
+
+Check out the files fro the end of the log.

@@ -1,11 +1,11 @@
-name: "mnist_trt"
-backend: "tensorrt"
+name: "mnist_pt"
+backend: "pytorch"
 max_batch_size: 128
 dynamic_batching { }
 
 input [
   {
-    name: "input"
+    name: "input0"
     data_type: TYPE_FP32
     format: FORMAT_NCHW
     dims: [ 1, 28, 28 ]
@@ -13,7 +13,7 @@ input [
 ]
 output [
   {
-    name: "output"
+    name: "output0"
     data_type: TYPE_FP32
     dims: [ 10 ]
   }
