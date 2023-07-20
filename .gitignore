@@ -16,4 +16,16 @@ hifigan.onnx
 backtrace.log
 model_navigator_help.txt
 perf_analyzer_help.txt
+model_analyzer_profile_help.txt
 navigator_config_run.yaml
+*.engine
+*.trt
+*.onnx
+*.plan
+*.pt
+__pycache__
+TensorRT
+*.pyc
+trtexec_help.txt
+trt.log
+triton_webinar/inference/output
