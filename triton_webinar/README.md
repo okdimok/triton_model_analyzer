@@ -23,7 +23,7 @@
 ```
 
 ## Topics
-* Containers(TensorRT, Triton, SDK and Client) overview
+* Containers (TensorRT, Triton, SDK and Client) overview
 * Create a MNIST PyTorch model and export it to ONNX and PyTorch TorchScript formats
 * Optimize it using TensorRT
 * Setup Triton to serve TensorRT optimized model, ONNX model and the BLS example model
@@ -225,4 +225,4 @@ model-analyzer profile --model-repository "${EXTWD}/inference/model_repo" \
 --override-output-model-repository
 ```
 
-Check out the files fro the end of the log.
+Check out the files from the end of the log.

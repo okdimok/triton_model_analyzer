@@ -2,9 +2,10 @@ These are the examples for the webinar on Triton Inference Server.
 For any additional information, feel free to contact 
 Dmitry Mironov [dmitrym@nvidia.com](mailto:dmitrym@nvidia.com)
 
-This repository contains two demos:
+This repository contains three demos:
 * Model Analyzer demo [in English](model_analysis_public_en.ipynb) and [in Russian](model_analysis_public.ipynb)
-* Triton in Kubernetes demo [English only](Triton_in_Kubernetes_en.ipynb)
+* [Basic TensorRT + Triton demo (English)](triton_webinar/README.md)
+* [Work In Progress] Triton in Kubernetes demo [English only](Triton_in_Kubernetes_en.ipynb)
 
 
 Additional file is [onnx-to-triton.ipynb](onnx-to-triton.ipynb), it can be used to generated a basic Triton config.pbtxt file from an ONNX file.
