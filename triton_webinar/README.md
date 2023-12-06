@@ -22,6 +22,8 @@
                                      └───────────────────────────────┘
 ```
 
+Check out the [on-demand recording](https://info.nvidia.com/indepth-review-triton-inference-webinar.html?ondemandrgt=yes#) to learn more details, about what's happening in the code.
+
 ## Topics
 * Containers (TensorRT, Triton, SDK and Client) overview
 * Create a MNIST PyTorch model and export it to ONNX and PyTorch TorchScript formats
@@ -226,3 +228,5 @@ model-analyzer profile --model-repository "${EXTWD}/inference/model_repo" \
 ```
 
 Check out the files from the end of the log.
+
+The second part of the webinar is available [here](../triton_webinar_pytriton_model_analyzer/README.md)

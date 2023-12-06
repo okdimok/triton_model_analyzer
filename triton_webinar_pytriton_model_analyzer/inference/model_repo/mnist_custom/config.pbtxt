@@ -1,0 +1,24 @@
+name: "mnist_custom"
+backend: "python"
+max_batch_size: 1
+input [
+  {
+    name: "input"
+    data_type: TYPE_FP32
+    format: FORMAT_NCHW
+    dims: [ 1, 28, 28 ]
+  }
+]
+output [
+  {
+    name: "output"
+    data_type: TYPE_FP32
+    dims: [ 10 ]
+  }
+]
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+  }
+]

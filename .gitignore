@@ -23,6 +23,7 @@ navigator_config_run.yaml
 *.onnx
 *.plan
 *.pt
+*.ckpt
 __pycache__
 TensorRT
 *.pyc
