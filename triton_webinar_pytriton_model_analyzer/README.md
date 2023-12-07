@@ -17,14 +17,14 @@ git clone https://github.com/okdimok/triton_model_analyzer.git
 cd triton_model_analyzer/triton_webinar_pytriton_model_analyzer
 ```
 
-1.1 Pull all the required docker containers
+2. Pull all the required docker containers
 ```bash
 docker pull nvcr.io/nvidia/pytorch:23.11-py3 
 docker pull nvcr.io/nvidia/tritonserver:23.11-py3 
 docker pull nvcr.io/nvidia/tritonserver:23.11-py3-sdk 
 ```
 
-2. Run the PyTorch container.
+3. Run the PyTorch container.
 ```bash
 docker run -it --rm --gpus all --shm-size=1g --ulimit memlock=-1 \
  --name pytorch_trt \
@@ -34,7 +34,7 @@ docker run -it --rm --gpus all --shm-size=1g --ulimit memlock=-1 \
  bash
 ```
 
-3. Inside the container, train a simple mnist model, save it to `.pt`, `.onnx` and convert the onnx model to the `.trt`. For more details, see [demo 1](../triton_webinar/README.md)
+4. Inside the container, train a simple mnist model, save it to `.pt`, `.onnx` and convert the onnx model to the `.trt`. For more details, see [demo 1](../triton_webinar/README.md)
 ```bash
 cd /workspace/ext/onnx_export; \
  python sample.py; \
@@ -44,12 +44,12 @@ cd /workspace/ext/onnx_export; \
      --maxShapes=input:128x1x28x28
 ```
 ### PyTriton 
-4. Install PyTriton
+5. Install PyTriton
 ```bash
 pip install nvidia-pytriton
 ```
 
-5. Start PyTriton server
+6. Start PyTriton server
 ```bash
 cd /workspace/ext/onnx_export;
 python pytriton_server.py
@@ -57,7 +57,7 @@ python pytriton_server.py
 
 ### Clients
 
-6. Now in another terminal start the container with the Triton clients
+7. Now in another terminal start the container with the Triton clients
 ```bash
 cd triton_model_analyzer/triton_webinar_pytriton_model_analyzer
 docker run --gpus all --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
@@ -69,7 +69,7 @@ bash
 cd /workspace/ext
 ```
 
-7. Let's first check the config of the models loaded (see [1](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_model_repository.md) and [2](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_model_configuration.md))
+8. Let's first check the config of the models loaded (see [1](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_model_repository.md) and [2](https://github.com/triton-inference-server/server/blob/main/docs/protocol/extension_model_configuration.md))
 ```
 curl -X GET http://127.0.0.1:8000/v2/models/stats | jq
 curl http://127.0.0.1:8000/v2/models/MnistInfer/config | jq

@@ -18,6 +18,8 @@ model_navigator_help.txt
 perf_analyzer_help.txt
 model_analyzer_profile_help.txt
 navigator_config_run.yaml
+perf.csv 
+perf_verbose.csv 
 *.engine
 *.trt
 *.onnx
