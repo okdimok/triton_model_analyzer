@@ -17,12 +17,20 @@ git clone https://github.com/okdimok/triton_model_analyzer.git
 cd triton_model_analyzer/triton_webinar_pytriton_model_analyzer
 ```
 
+1.1 Pull all the required docker containers
+```bash
+docker pull nvcr.io/nvidia/pytorch:23.11-py3 
+docker pull nvcr.io/nvidia/tritonserver:23.11-py3 
+docker pull nvcr.io/nvidia/tritonserver:23.11-py3-sdk 
+```
+
 2. Run the PyTorch container.
 ```bash
-docker run --rm --gpus all --shm-size=1g --ulimit memlock=-1 \
+docker run -it --rm --gpus all --shm-size=1g --ulimit memlock=-1 \
  --name pytorch_trt \
  -p 8000-8002:8000-8002 \
- -v "$(pwd -P)":/workspace/ext -ti nvcr.io/nvidia/pytorch:23.11-py3 \
+ -v "$(pwd -P)":/workspace/ext \
+ nvcr.io/nvidia/pytorch:23.11-py3 \
  bash
 ```
 
@@ -50,7 +58,7 @@ python pytriton_server.py
 ### Clients
 
 6. Now in another terminal start the container with the Triton clients
-```
+```bash
 cd triton_model_analyzer/triton_webinar_pytriton_model_analyzer
 docker run --gpus all --rm -it -v /var/run/docker.sock:/var/run/docker.sock \
 --name triton_clients \
@@ -97,23 +105,60 @@ If you compare these results vs the results in [demo 1](../triton_webinar/README
 * The model is small and quick. For the bigger model, more time is spent in the compute itself.
 * We do not optimize our model for inference in any way. For example, we don't use TorchScript.
 
-11. Let's analyze this performance
-TODO
+11. Let's analyze this performance a little deeper. For this let's check out the perf_analyzer help and [perf_analyzer docs](https://github.com/triton-inference-server/client/blob/main/src/c++/perf_analyzer/README.md) and specifically [this part](https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/perf_analyzer/docs/measurements_metrics.md#visualizing-latency-vs-throughput) and also [CLI docs](https://github.com/triton-inference-server/client/blob/main/src/c%2B%2B/perf_analyzer/docs/cli.md). We will first check the basic csv, and then have a look at additional available metrics
+```bash
+perf_analyzer -m MnistInfer --shape "input:1,28,28" \
+-b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
+-i gRPC \
+--concurrency-range 1:257:64 \
+-f perf.csv 
+perf_analyzer -m MnistInfer --shape "input:1,28,28" \
+-b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
+-i gRPC \
+--concurrency-range 1:257:64 \
+-f perf_verbose.csv \
+--collect-metrics \
+--verbose-csv
+echo -e "\07" # this is a bell sound
+```
 
-### BLS ?
+12. Following the docs, let's open [the spreadsheet](https://docs.google.com/spreadsheets/d/1S8h0bWBBElHUoLd2SOvQPzZzRiQ55xjyqodm_9ireiw)
+
+We see the performance is indeed limited by the process of computing the outputs, and not by some other overheads. Let's now deploy the `.onnx` and `.trt` versions of the model, to demanstrate the Model Analyzer capabilities.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+First, exit the PyTorch container with `Ctrl+D`
 
 5. Copy the models created to the model repository
 
 ```
 cd /workspace/ext
+mkdir -p inference/model_repo/mnist_trt/1/
+mkdir -p inference/model_repo/mnist_onnx/1/
 cp onnx_export/model.trt inference/model_repo/mnist_trt/1/model.plan
 cp onnx_export/model.onnx inference/model_repo/mnist_onnx/1/model.onnx
 ```
 
 6. Start Triton Inference Server
-```
+```bash
 docker run --rm --gpus all --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 \
--p 8000:8000 -p 8001:8001 -p 8002:8002 `# theese are default ports for HTTP, GRPC and metrics` \
+-p 8000-8002:8000-8002 `# theese are default ports for HTTP, GRPC and metrics` \
 --name triton_server \
 -v "$(pwd)":/workspace/ext -ti nvcr.io/nvidia/tritonserver:23.11-py3 \
 tritonserver --model-repository /workspace/ext/inference/model_repo \

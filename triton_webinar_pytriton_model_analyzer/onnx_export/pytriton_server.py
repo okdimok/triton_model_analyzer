@@ -82,6 +82,7 @@ def main():
             ],
             outputs=[
                 # predictions taken from softmax layer
+                # they're taken as a key from the function output dict
                 Tensor(name="predictions", dtype=np.float32, shape=(-1,)),
             ],
             config=ModelConfig(max_batch_size=64),
