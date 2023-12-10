@@ -32,3 +32,4 @@ TensorRT
 trtexec_help.txt
 trt.log
 triton_webinar/inference/output
+tts_hifigan.nav

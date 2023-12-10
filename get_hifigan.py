@@ -3,8 +3,12 @@
 
 from nemo.collections.tts.models import HifiGanModel
 
-model = HifiGanModel.from_pretrained(model_name="tts_hifigan")
+# print("HifiGanModel available models:")
+# print(HifiGanModel.list_available_models())
+# print("#" * 10)
+
+model = HifiGanModel.from_pretrained(model_name="tts_en_hifigan")
 model.export("./hifigan.onnx")
 
-model = HifiGanModel.from_pretrained(model_name="tts_hifigan")
+model = HifiGanModel.from_pretrained(model_name="tts_en_hifigan")
 model.export("./hifigan.pt")

@@ -124,7 +124,11 @@ echo -e "\07" # this is a bell sound
 
 12. Following the docs, let's open [the spreadsheet](https://docs.google.com/spreadsheets/d/1S8h0bWBBElHUoLd2SOvQPzZzRiQ55xjyqodm_9ireiw)
 
-We see the performance is indeed limited by the process of computing the outputs, and not by some other overheads. Let's now deploy the `.onnx` and `.trt` versions of the model, to demanstrate the Model Analyzer capabilities.
+We see the performance is indeed limited by the process of computing the outputs, and not by some other overheads. 
+
+OK, let's demonstrate Performance Analyzer and Model Analyzer on a more demanding model now. 
+But before that, don't forget to stop the containers with Ctrl+D.
+Check out [the demo instructions](/model_analysis_public_en.ipynb)
 
 
 
@@ -143,114 +147,4 @@ We see the performance is indeed limited by the process of computing the outputs
 
 
 
-First, exit the PyTorch container with `Ctrl+D`
 
-5. Copy the models created to the model repository
-
-```
-cd /workspace/ext
-mkdir -p inference/model_repo/mnist_trt/1/
-mkdir -p inference/model_repo/mnist_onnx/1/
-cp onnx_export/model.trt inference/model_repo/mnist_trt/1/model.plan
-cp onnx_export/model.onnx inference/model_repo/mnist_onnx/1/model.onnx
-```
-
-6. Start Triton Inference Server
-```bash
-docker run --rm --gpus all --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 \
--p 8000-8002:8000-8002 `# theese are default ports for HTTP, GRPC and metrics` \
---name triton_server \
--v "$(pwd)":/workspace/ext -ti nvcr.io/nvidia/tritonserver:23.11-py3 \
-tritonserver --model-repository /workspace/ext/inference/model_repo \
---log-verbose 0 `# change this to 4 for a very detailed log, that may affect performance`
-```
-
-
-10. Now let's measure the approximate performance of the model with perf_analyzer. One can save perf_analyzer help for later usage:
-```
-perf_analyzer --help 2>&1 | tee perf_analyzer_help.txt
-```
-
-11. Then measure the performance of the trt model
-
-```
-perf_analyzer -m mnist_trt --shape "input:1,28,28"
-```
-My output:
-```
-Inferences/Second vs. Client Average Batch Latency
-Concurrency: 1, throughput: 1546.36 infer/sec, latency 645 usec
-```
-
-The command above is using the inefficient HTTP. The optimal launch will probably use GRPC, and use several streams to rely on dynamic batching:
-
-```
-perf_analyzer -m mnist_trt --shape "input:1,28,28" \
--b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
--i gRPC \
---concurrency-range 1:257:64
-```
-
-My output:
-```
-Inferences/Second vs. Client Average Batch Latency
-Concurrency: 1, throughput: 1464.21 infer/sec, latency 682 usec
-Concurrency: 65, throughput: 30403.9 infer/sec, latency 2136 usec
-Concurrency: 129, throughput: 28366.5 infer/sec, latency 4545 usec
-Concurrency: 193, throughput: 31912.4 infer/sec, latency 6045 usec
-Concurrency: 257, throughput: 35058.6 infer/sec, latency 7328 usec
-```
-
-We see dynamic batching adds 20x to the model performance. 
-See [Recommended Configuration Process](https://github.com/triton-inference-server/server/blob/main/docs/user_guide/model_configuration.md#recommended-configuration-process) on how to optimize the performace of the model further.
-
-12. Let's compare the trt, the onnx and the pt model on concurrency 65.
-
-```
-perf_analyzer -m mnist_onnx --shape "input:1,28,28" \
--b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
--i gRPC \
---concurrency-range 65
-```
-
-```
-Inferences/Second vs. Client Average Batch Latency
-Concurrency: 65, throughput: 26951.8 infer/sec, latency 2410 usec
-```
-
-```
-perf_analyzer -m mnist_pt --shape "input:1,28,28" \
--b 1 `# we still specify batch = 1 and rely on server batching, not on the client one` \
--i gRPC \
---concurrency-range 65
-```
-```
-Inferences/Second vs. Client Average Batch Latency
-Concurrency: 65, throughput: 4799.15 infer/sec, latency 13543 usec
-```
-
-Finally, these are the results of the comparison for me. We see TensorRT gives the highest throughput having the lowest latency.
-
-| Framework           | Throughput (infer/sec) | Throuput Relative | Latency    | Latency Relative |
-|---------------------|------------|-------------------|------------|------------------|
-| PyTorch TorchScript | 4799.15    | 1X                | 13543 usec |  6.3X            |
-| ONNX Runtime        | 26951.8    | 5.6X              | 2410 usec  |  1.12X           |
-| TensorRT            | 30403.9    | 6.3X              | 2136 usec  |  1X              |
-
-13. Finally, this is a sample model analyzer command, to seek through the trt model configurations. For that, stop the Triton Server Container and then in the client container run. See the [docs](https://github.com/triton-inference-server/model_analyzer/blob/main/docs/config_search.md) for further details.
-
-```
-cd "${EXTWD}"
-model-analyzer profile --help  | tee model_analyzer_profile_help.txt
-model-analyzer profile --model-repository "${EXTWD}/inference/model_repo" \
---profile-models mnist_trt --triton-launch-mode=docker \
---output-model-repository-path "${EXTWD}/inference/output" \
---run-config-search-max-concurrency 256 \
---run-config-search-min-concurrency 16 \
---run-config-search-max-instance-count 4 \
---run-config-search-max-model-batch-size 128 \
---run-config-search-mode quick \
---override-output-model-repository
-```
-
-Check out the files from the end of the log.
